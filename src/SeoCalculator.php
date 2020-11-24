@@ -139,6 +139,40 @@ class SeoCalculator
         return round(($score / $threshold) * 100);
     }
 
+    public function getScoreOutOfFive()
+    {
+        $score = $this->calculateScorePercentage() / 10;
+        return $score / 2;
+    }
+
+    /**
+     * Get star ratings as html (based on the currently calculated score)
+     *
+     * @return string
+     */
+    public function getHTMLStars()
+    {
+        $score = $this->calculateScorePercentage() / 10;
+        $num_stars = intval($this->getScoreOutOfFive());
+        $num_nostars = 5 - $num_stars;
+        $html = '<div id="fivestar-widget">';
+
+        for ($i = 1; $i <= $num_stars; $i++) {
+            $html .= '<div class="star on"></div>';
+        }
+        if ($score % 2) {
+            $html .= '<div class="star on-half"></div>';
+            $num_nostars--;
+        }
+        for ($i = 1; $i <= $num_nostars; $i++) {
+            $html .= '<div class="star"></div>';
+        }
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
     /**
      * Calculate the score threshold
      *
@@ -157,11 +191,11 @@ class SeoCalculator
     public function getTranslatedTips()
     {
         return [
-            'subject_defined' => _t('SEO.SEOScoreTipPageSubjectDefined', 'Page subject is not defined for page'),
-            'subject_in_title' => _t('SEO.SEOScoreTipPageSubjectInTitle', 'Page subject is not in the title of this page'),
-            'subject_in_firstparagraph' => _t('SEO.SEOScoreTipPageSubjectInFirstParagraph', 'Page subject is not present in the first paragraph of the content of this page'),
-            'subject_in_url' => _t('SEO.SEOScoreTipPageSubjectInURL', 'Page subject is not present in the URL of this page'),
-            'subject_in_metadescription' => _t('SEO.SEOScoreTipPageSubjectInMetaDescription', 'Page subject is not present in the meta description of the page'),
+            'subject_defined' => _t('SEO.SEOScoreTipPageSubjectDefined', 'Subject is not defined'),
+            'subject_in_title' => _t('SEO.SEOScoreTipPageSubjectInTitle', 'Subject is not in the title'),
+            'subject_in_firstparagraph' => _t('SEO.SEOScoreTipPageSubjectInFirstParagraph', 'Subject is not present in the first paragraph of the content of this page'),
+            'subject_in_url' => _t('SEO.SEOScoreTipPageSubjectInURL', 'Subject is not present in the URL'),
+            'subject_in_metadescription' => _t('SEO.SEOScoreTipPageSubjectInMetaDescription', 'Subject is not present in the meta description of the page'),
             'subject_in_image_alt_tags' => _t('SEO.SEOScoreTipSubjectInImageAltTags', 'Subject is not present in image alt tags'),
             'numwords_content_ok' => _t('SEO.SEOScoreTipNumwordsContentOk', 'The content of this page is too short and does not have enough words. Please create content of at least 300 words based on the Page subject.'),
             'metatitle_length_ok' => _t('SEO.SEOScoreTipPageTitleLengthOk', 'The metatitle of the page should have a length of between 10 and 70 characters.'),
@@ -190,8 +224,7 @@ class SeoCalculator
     /**
      * Get a list of tips based on calculated score
      *
-     * @param none
-     * @return none, set class string seo_score_tips with tips html
+     * @return array
      */
     public function getTipsArray()
     {
@@ -200,12 +233,35 @@ class SeoCalculator
         $tips = [];
 
         foreach ($this->getRelevantScoreCriteria() as $index => $crit) {
-            if (!$crit) {
+            if (!$crit && in_array($index, array_keys($translations))) {
                 $tips[] = $translations[$index];
             }
         }
 
         return $tips;
+    }
+
+    /**
+     * Get a list of tips as HTML
+     *
+     * @return string
+     */
+    public function getTipsAsHTML()
+    {
+        $tips = $this->getTipsArray();
+        $html = "";
+
+        if (count($tips) > 0) {
+            $html .= '<ul id="seo_score_tips">';
+
+            foreach ($tips as $text) {
+                $html .= '<li>' . $text . '</li>';
+            }
+
+            $html .= '</ul>';
+        }
+
+        return $html;
     }
 
     /**
