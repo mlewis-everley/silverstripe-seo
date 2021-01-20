@@ -197,16 +197,13 @@ class SeoObjectExtension extends DataExtension
         );
 
         // move Metadata field from Root.Main to SEO tab for visualising direct impact on search result
-        $fields->removeFieldsFromTab(
-            'Root.Main',
-            [
-                'Metadata',
-                'SEOSocialType',
-                'SEOHideSocialData',
-                'SEOSocialImage',
-                'SEOSubjects'
-            ]
-        );
+        $fields->removeByName([
+            'Metadata',
+            'SEOSocialType',
+            'SEOHideSocialData',
+            'SEOSocialImage',
+            'SEOSubjects'
+        ]);
 
         $fields->addFieldsToTab(
             'Root.SEO',
@@ -228,45 +225,39 @@ class SeoObjectExtension extends DataExtension
                 LiteralField::create('Score', $this->getHTMLStars()),
                 LiteralField::create('ScoreClear', '<div class="score_clear"></div>'),
                 LiteralField::create('ScoreTipsTitle', '<h4 class="seo_score">' . _t('SEO.SEOScoreTips', 'SEO Score Tips') . '</h4>'),
-                LiteralField::create('ScoreTips', $owner->getSEOCalculator()->getTipsAsHTML())
+                LiteralField::create('ScoreTips', $owner->getSEOCalculator()->getTipsAsHTML()),
+                
+                // Add subjects
+                ToggleCompositeField::create(
+                    'SEOSearchSubjects',
+                    _t('SEO.SEOSearchSubjects', "Search Subjects"),
+                    [
+                        GridField::create('SEOSubjects', '', $owner->SEOSubjects())
+                            ->setConfig(GridFieldConfig_RelationEditor::create())
+                    ]
+                ),
+
+                // Add Social settings
+                ToggleCompositeField::create(
+                    'SEOSocialData',
+                    _t('SEO.SEOSocialData', "Social Data"),
+                    [
+                        $this
+                            ->getOwner()
+                            ->dbObject('SEOHideSocialData')
+                            ->scaffoldFormField()
+                            ->setTitle(_t('SEO.SEOHideSocialDataDescription', 'Hide Social Data From Pages HTML?')),
+                        DropdownField::create(
+                            'SEOSocialType',
+                            _t('SEO.SEOSocialType', 'Social Content Type')
+                        )->setSource($this->config()->og_types),
+                        UploadField::create(
+                            'SEOSocialImage',
+                            _t('SEO.SEOSocialImage', 'Image to share on Social Media')
+                        )->setDescription(_t('SEO.SEODefaultImage', 'Defaults to featured image, if available'))
+                    ]
+                )
             ]
-        );
-
-        // Add subjects
-        $fields->addFieldToTab(
-            'Root.SEO',
-            ToggleCompositeField::create(
-                'SEOSearchSubjects',
-                _t('SEO.SEOSearchSubjects', "Search Subjects"),
-                [
-                    GridField::create('SEOSubjects', '', $owner->SEOSubjects())
-                        ->setConfig(GridFieldConfig_RelationEditor::create())
-                ]
-            )
-        );
-
-        // Add Social settings
-        $fields->addFieldToTab(
-            'Root.SEO',
-            ToggleCompositeField::create(
-                'SEOSocialData',
-                _t('SEO.SEOSocialData', "Social Data"),
-                [
-                    $this
-                        ->getOwner()
-                        ->dbObject('SEOHideSocialData')
-                        ->scaffoldFormField()
-                        ->setTitle(_t('SEO.SEOHideSocialDataDescription', 'Hide Social Data From Pages HTML?')),
-                    DropdownField::create(
-                        'SEOSocialType',
-                        _t('SEO.SEOSocialType', 'Social Content Type')
-                    )->setSource($this->config()->og_types),
-                    UploadField::create(
-                        'SEOSocialImage',
-                        _t('SEO.SEOSocialImage', 'Image to share on Social Media')
-                    )->setDescription(_t('SEO.SEODefaultImage', 'Defaults to featured image, if available'))
-                ]
-            )
         );
     }
 
