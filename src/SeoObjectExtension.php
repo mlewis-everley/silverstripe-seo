@@ -102,10 +102,10 @@ class SeoObjectExtension extends DataExtension
 
         $owner = $this->getOwner();
         $calc = SeoCalculator::create()
-            ->setTitle($owner->Title)
-            ->setContent($owner->Content)
-            ->setUrl($owner->AbsoluteLink())
-            ->setMetaDescription($owner->MetaDescription);
+            ->setTitle((string)$owner->Title)
+            ->setContent((string)$owner->Content)
+            ->setUrl((string)$owner->AbsoluteLink())
+            ->setMetaDescription((string)$owner->MetaDescription);
 
         $this->calculator = $calc;
         return $calc;
@@ -172,6 +172,7 @@ class SeoObjectExtension extends DataExtension
      */
     public function updateCMSFields(FieldList $fields)
     {
+
         // exclude SEO tab from some pages
         $excluded = Config::inst()->get(self::class, 'excluded_page_types');
         $owner = $this->getOwner();
