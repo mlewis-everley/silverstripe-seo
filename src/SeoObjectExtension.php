@@ -22,6 +22,9 @@ use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\i18n\i18n;
+use SilverStripe\ErrorPage\ErrorPage;
+use SilverStripe\CMS\Model\VirtualPage;
+use SilverStripe\CMS\Model\RedirectorPage;
 
 /**
  * SeoObjectExtension extends SiteTree with functionality for helping content authors to
@@ -39,9 +42,9 @@ class SeoObjectExtension extends DataExtension
      * @var array
      */
     private static $excluded_page_types = [
-        'ErrorPage',
-        'RedirectorPage',
-        'VirtualPage'
+        ErrorPage::class,
+        RedirectorPage::class,
+        VirtualPage::class
     ];
 
     /**
@@ -298,7 +301,7 @@ class SeoObjectExtension extends DataExtension
      * Attempt to find a suitable social image to use if one is not set.
      * By default try to see if this is a blog post and add the "Featured Image"
      *
-     * @return Image 
+     * @return Image
      */
     public function getSEOPreferedSocialImage()
     {

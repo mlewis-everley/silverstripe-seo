@@ -2,12 +2,14 @@
 
 namespace Hubertusanton\SilverStripeSeo;
 
-use DOMDocument;
 use Exception;
+use DOMDocument;
 use LogicException;
 use SilverStripe\Core\Convert;
 use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\FieldType\DBHTMLText;
@@ -633,7 +635,9 @@ class SeoCalculator
     public function getRenderedContent()
     {
         if (!empty($this->getUrl())) {
-            $response = Director::test($this->getUrl());
+            $request = Injector::inst()->get(HTTPRequest::class);
+            $session = $request->getSession();
+            $response = Director::test($this->getUrl(), [], $session);
 
             if (!$response->isError()) {
                 $this->rendered_html = $response->getBody();
